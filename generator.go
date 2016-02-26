@@ -152,8 +152,16 @@ func (g *generator) generateAtInterval() {
 						log.Printf("Error listing containers: %s\n", err)
 						continue
 					}
-					// ignore changed return value. always run notify command
-					GenerateFile(config, containers)
+					// // ignore changed return value. always run notify command
+					// GenerateFile(config, containers)
+					
+					// if no changed, MUST skip notify...
+					changed := GenerateFile(config, containers)
+					if !changed {
+						log.Printf("Contents of %s did not change. Skipping notification '%s'", config.Dest, config.NotifyCmd)
+						continue
+					}
+					
 					g.runNotifyCmd(config)
 					g.sendSignalToContainer(config)
 				case sig := <-sigChan:
